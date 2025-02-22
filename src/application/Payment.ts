@@ -1,36 +1,51 @@
 import { NextFunction, Request, Response } from "express";
 import Order from "../infrastructure/schemas/Order";
+import Product from "../infrastructure/schemas/Product"; 
 import stripe from "../infrastructure/stripe";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 const FRONTEND_URL = process.env.FRONTEND_URL as string;
 
 async function fulfillCheckout(sessionId: string) {
-  // Set your secret key. Remember to switch to your live secret key in production.
-  // See your keys here: https://dashboard.stripe.com/apikeys
   console.log("Fulfilling Checkout Session " + sessionId);
 
-  // TODO: Make this function safe to run multiple times,
-  // even concurrently, with the same session ID
-
-  // TODO: Make sure fulfillment hasn't already been
-  // peformed for this Checkout Session
-
-  // Retrieve the Checkout Session from the API with line_items expanded
   const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
     expand: ["line_items"],
   });
 
-  // Check the Checkout Session's payment_status property
-  // to determine if fulfillment should be peformed
   if (checkoutSession.payment_status !== "unpaid") {
-    // TODO: Perform fulfillment of the line items
-    // TODO: Record/save fulfillment status for this
-    // Checkout Session
+    // Perform fulfillment of the line items
+    const lineItems = checkoutSession.line_items?.data;
+    if (lineItems) {
+      for (const item of lineItems) {
+        const productId = item.price?.id; 
+        const product = await Product.findById(productId);
+
+        if (product && product.stockQuantity > 0) {
+          product.stockQuantity -= 1; // Reduce the stock by 1
+          await product.save();
+
+          const order = new Order({
+            sessionId: sessionId,
+            itemId: productId,
+            quantity: item.quantity,
+            status: "fulfilled",
+          });
+          await order.save();
+        } else {
+          console.log(`${product} is out of stock`);
+        }
+      }
+    }
+    console.log("Fulfillment completed for session " + sessionId);
   }
 }
 
-export const handleWebhook = async (req: Request, res: Response) => {
+export const handleWebhook = async (
+  req: Request, 
+  res: Response,
+  next: NextFunction
+) => {
   const payload = req.body;
   const sig = req.headers["stripe-signature"] as string;
 
@@ -42,34 +57,47 @@ export const handleWebhook = async (req: Request, res: Response) => {
       event.type === "checkout.session.completed" ||
       event.type === "checkout.session.async_payment_succeeded"
     ) {
-      console.log(event);
+      const session = event.data.object as any;
+      await fulfillCheckout(session.id);
       res.status(200).send();
       return;
     }
-  } catch (err) {
-    // @ts-ignore
-    res.status(400).send(`Webhook Error: ${err.message}`);
+  } catch (e) {
+    const error = e as Error;
+    res.status(400).send(`Webhook Error: ${error.message}`);
     return;
   }
 };
 
-export const createCheckoutSession = async (req: Request, res: Response) => {
-  const session = await stripe.checkout.sessions.create({
-    ui_mode: "embedded",
-    line_items: [
-      {
-        price: "price_1Qt1arJjbWEvglIU4ZKpMw3f",
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    return_url: `${FRONTEND_URL}/shop/complete?session_id={CHECKOUT_SESSION_ID}`,
-  });
+export const createCheckoutSession = async (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      ui_mode: "embedded",
+      line_items: [
+        {
+          price: "price_1Qt1arJjbWEvglIU4ZKpMw3f",
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      return_url: `${FRONTEND_URL}/shop/complete?session_id={CHECKOUT_SESSION_ID}`,
+    });
 
-  res.send({ clientSecret: session.client_secret });
+    res.send({ clientSecret: session.client_secret });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const retrieveSessionStatus = async (req: Request, res: Response) => {
+export const retrieveSessionStatus = async (
+  req: Request, 
+  res: Response,
+  next: NextFunction
+) => {
   const session = await stripe.checkout.sessions.retrieve(
     req.query.session_id as string
   );

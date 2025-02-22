@@ -7,12 +7,8 @@ import { CreateOrderDTO } from "../domain/dto/order";
 import mongoose from "mongoose";
 
 
-export interface AuthenticatedRequest extends Request {
-  auth?: any;
-}
-
 export const createOrder = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
