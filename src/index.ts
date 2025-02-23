@@ -21,7 +21,7 @@ app.use(cors({ origin: "https://fed-storefront-frontend-charith.netlify.app" }))
 
 // Use CORS middleware with more comprehensive configuration
 // app.use(cors({
-//     origin: 'http://localhost:5173',
+//     origin: 'https://fed-storefront-frontend-charith.netlify.app',
 //     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 //     credentials: true, // Allow cookies to be sent
 //     allowedHeaders: 'Content-Type,Authorization',
