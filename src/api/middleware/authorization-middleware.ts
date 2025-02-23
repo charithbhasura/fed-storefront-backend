@@ -2,12 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import ForbiddenError from "../../domain/errors/forbidden-error";
 
 
-interface AuthenticatedRequest extends Request {
-  auth?: any;
-};
-
 export const isAdmin = (
-    req: AuthenticatedRequest, 
+    req: Request, 
     res: Response, 
     next: NextFunction
 ) => {

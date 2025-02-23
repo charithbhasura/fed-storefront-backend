@@ -4,7 +4,7 @@ import Product from "../infrastructure/schemas/Product";
 import stripe from "../infrastructure/stripe";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
-const FRONTEND_URL = process.env.FRONTEND_URL as string;
+const FRONTEND_URL = "https://fed-storefront-frontend-charith.netlify.app";
 
 async function fulfillCheckout(sessionId: string) {
   console.log("Fulfilling Checkout Session " + sessionId);

@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import UnauthorizedError from "../../domain/errors/unauthorized-error";
 
-interface AuthenticatedRequest extends Request {
-    auth?: any;
-  };
 
 export const isAuthenticated = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
