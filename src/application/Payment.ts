@@ -88,6 +88,7 @@ export const createCheckoutSession = async (
     });
 
     res.send({ clientSecret: session.client_secret });
+    return;
   } catch (error) {
     next(error);
   }
@@ -106,4 +107,5 @@ export const retrieveSessionStatus = async (
     status: session.status,
     customer_email: session.customer_details?.email,
   });
+  return;
 };

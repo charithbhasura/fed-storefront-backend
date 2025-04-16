@@ -55,6 +55,7 @@ export const createOrder = async (
 
     await session.commitTransaction();
     res.status(201).send();
+    return;
 
   } catch (error) {
     await session.abortTransaction();
