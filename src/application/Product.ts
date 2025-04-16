@@ -14,6 +14,7 @@ export const getProducts = async (
     if(!categoryId){
       const data = await Product.find();
       res.status(200).json(data)
+      return;
     }
     const data = await Product.find({categoryId});
     res.status(200).json(data);
