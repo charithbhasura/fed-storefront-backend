@@ -16,8 +16,8 @@ import bodyParser from "body-parser";
 const app = express();
 app.use(express.json()); // For parsing JSON requests
 app.use(clerkMiddleware());
-// app.use(cors({ origin: process.env.FRONTEND_URL }));
-app.use(cors({ origin: "https://fed-storefront-frontend-charith.netlify.app" }));
+app.use(cors({ origin: process.env.FRONTEND_URL}));
+//app.use(cors({ origin: "https://fed-storefront-frontend-charith.netlify.app" }));
 
 // Use CORS middleware with more comprehensive configuration
 // app.use(cors({
