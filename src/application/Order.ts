@@ -83,6 +83,7 @@ export const getOrder = async (
       throw new ValidationError("Order not found");
     }
     res.status(200).json(orders);
+    return;
   } catch (error) {
     next(error);
   }

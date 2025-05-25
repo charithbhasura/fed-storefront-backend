@@ -1,7 +1,7 @@
 import { z } from "zod";
 export const CreateOrderDTO = z.object({
-  items: z
-    .object({
+  items: z.array(
+    z.object({
       product: z.object({
         _id: z.string(),
         name: z.string(),
@@ -9,12 +9,12 @@ export const CreateOrderDTO = z.object({
         image: z.string(),
         description: z.string(),
       }),
-      quantity: z.number(),
+      quantity: z.number().min(1),
     })
-    .array(),
+  ),
   shippingAddress: z.object({
     line_1: z.string(),
-    line_2: z.string(),
+    line_2: z.string().optional(),
     city: z.string(),
     state: z.string(),
     zip_code: z.string(),
