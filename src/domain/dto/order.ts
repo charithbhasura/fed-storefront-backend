@@ -3,7 +3,7 @@ export const CreateOrderDTO = z.object({
   items: z.array(
     z.object({
       product: z.object({
-        _id: z.string(),
+        _id: z.string().optional(),
         name: z.string(),
         price: z.number(),
         image: z.string(),
@@ -20,4 +20,10 @@ export const CreateOrderDTO = z.object({
     zip_code: z.string(),
     phone: z.string(),
   }),
-});
+}).strict(); // Ensures no extra fields are present
+
+// To debug, add this log in your order handler before validation:
+// console.log("Incoming order data:", req.body);
+
+// If you continue to get errors, the issue is with the shape of the incoming data.
+// Compare the logged data to this schema to find mismatches.
