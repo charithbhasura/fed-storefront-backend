@@ -75,19 +75,24 @@ export const createCheckoutSession = async (
   next: NextFunction
 ) => {
   try {
+    const { items } = req.body; // items from frontend
+
     const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded",
-      line_items: [
-        {
-          price: "price_1Qt1arJjbWEvglIU4ZKpMw3f",
-          quantity: 1,
+      payment_method_types: ['card'],
+      line_items: items.map((item: { name: any; price: number; quantity: any; }) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: { name: item.name },
+          unit_amount: item.price * 100, // Stripe expects cents
         },
-      ],
-      mode: "payment",
-      return_url: `${FRONTEND_URL}/shop/complete?session_id={CHECKOUT_SESSION_ID}`,
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `${FRONTEND_URL}/shop/complete?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/shop/cancel`,
     });
 
-    res.send({ clientSecret: session.client_secret });
+    res.json({ url: session.url });
     return;
   } catch (error) {
     next(error);
@@ -108,4 +113,21 @@ export const retrieveSessionStatus = async (
     customer_email: session.customer_details?.email,
   });
   return;
+};
+
+export const createPaymentIntent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { amount } = req.body;
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: "usd",
+    });
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    next(error);
+  }
 };

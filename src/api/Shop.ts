@@ -7,5 +7,3 @@ export const shopRouter = Router();
 shopRouter
     .route('/shop/:productId')  
     .get(isAuthenticated, getProduct);
-
-

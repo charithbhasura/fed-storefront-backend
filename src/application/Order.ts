@@ -78,7 +78,7 @@ export const getOrder = async (
     // Updated population logic
     const orders = await Order.findById(id)
       .populate({ path: "addressId", model: "Address" })
-      .populate({ path: "items.product", model: "Product" }); // <-- Correct
+      .populate({ path: "items.product", model: "Product" }); 
 
     if (!orders) {
       throw new ValidationError("Order not found");
