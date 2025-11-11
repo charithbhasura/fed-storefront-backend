@@ -20,7 +20,7 @@ export const CreateOrderDTO = z.object({
     zip_code: z.string(),
     phone: z.string(),
   }),
-}).strict(); // Ensures no extra fields are present
+}).passthrough(); // Ensures no extra fields are present
 
 // To debug, add this log in your order handler before validation:
 // console.log("Incoming order data:", req.body);
