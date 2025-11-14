@@ -14,18 +14,19 @@ import bodyParser from "body-parser";
 
 
 const app = express();
-app.use(express.json()); // For parsing JSON requests
+app.use(express.json());
 app.use(clerkMiddleware());
-app.use(cors({ origin: process.env.FRONTEND_URL}));
-//app.use(cors({ origin: "https://fed-storefront-frontend-charith.netlify.app" }));
+//app.use(cors({ origin: process.env.FRONTEND_URL}));
+//app.use(cors({ origin: "http://localhost:5173" }));
 
-// Use CORS middleware with more comprehensive configuration
-// app.use(cors({
-//     origin: 'https://fed-storefront-frontend-charith.netlify.app',
-//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//     credentials: true, // Allow cookies to be sent
-//     allowedHeaders: 'Content-Type,Authorization',
-//   }));
+app.use(cors({
+    origin: [
+      'http://localhost:5173',
+      'https://fed-storefront-frontend-charith.netlify.app'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: 'Content-Type,Authorization',
+  }));
 
 
 app.post(
@@ -46,5 +47,5 @@ app.use("/api/shop",shopRouter);
 app.use(globalErrorHandlingMiddleware);
 
 connectDB();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;  
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
